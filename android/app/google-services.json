@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "658345558218",
+    "project_id": "oceanix-f6af3",
+    "storage_bucket": "oceanix-f6af3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658345558218:android:a7d63a59bfe22989fb3433",
+        "android_client_info": {
+          "package_name": "com.example.oceanix"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "658345558218-sjdj2nsl6lohnaspe0uq48sn99gcnjjh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOMPV2JTzATxIVeXAqYYl2nh_4pBXV7bo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "658345558218-sjdj2nsl6lohnaspe0uq48sn99gcnjjh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

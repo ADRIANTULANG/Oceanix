@@ -129,9 +129,35 @@ class ChatView extends GetView<ChatController> {
                                     style: TextStyle(
                                         fontWeight: FontWeight.w500,
                                         color: Colors.grey,
-                                        fontSize: 9.sp),
+                                        fontSize: 5.sp),
                                   )),
-                            )
+                            ),
+                            index == controller.messages.length - 1
+                                ? Padding(
+                                    padding: EdgeInsets.only(
+                                      left: 7.w,
+                                      right: 7.w,
+                                    ),
+                                    child: Align(
+                                        alignment: (controller
+                                                    .messages[index].receiver ==
+                                                Get.find<StorageServices>()
+                                                    .storage
+                                                    .read('id')
+                                            ? Alignment.topLeft
+                                            : Alignment.topRight),
+                                        child: Text(
+                                          "seen by " +
+                                              controller.seenByList
+                                                  .join(" & ") +
+                                              ".",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey,
+                                              fontSize: 5.sp),
+                                        )),
+                                  )
+                                : SizedBox()
                           ],
                         );
                       },

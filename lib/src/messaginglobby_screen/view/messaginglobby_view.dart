@@ -6,6 +6,7 @@ import 'package:oceanix/src/messaginglobby_screen/view/sendchattouser_view.dart'
 import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
 
+import '../../../services/colors_services.dart';
 import '../../chat_screen/view/chat_view.dart';
 import '../model/messaginglobby_chat_model.dart';
 
@@ -67,9 +68,10 @@ class MessagingLobyyView extends GetView<MessagingLobbyController> {
                     itemCount: controller.lobbyChatList.length,
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
-                        onTap: () {
+                        onTap: () async {
                           String receiverDocumentID = '';
                           User? userDetails;
+
                           for (var i = 0;
                               i < controller.lobbyChatList[index].users.length;
                               i++) {
@@ -83,11 +85,18 @@ class MessagingLobyyView extends GetView<MessagingLobbyController> {
                                   controller.lobbyChatList[index].users[i];
                             }
                           }
+
                           Get.to(() => ChatView(), arguments: {
                             "chatDocumentID":
                                 controller.lobbyChatList[index].id,
                             "sendtoID": receiverDocumentID,
                             "userDetails": userDetails
+                          });
+                          await controller.onOpenUpdateSeenBy(
+                              chatDocumentID:
+                                  controller.lobbyChatList[index].id);
+                          Future.delayed(Duration(seconds: 3), () {
+                            controller.lobbyChatList[index].isSeen.value = true;
                           });
                         },
                         child: Row(
@@ -128,7 +137,7 @@ class MessagingLobyyView extends GetView<MessagingLobbyController> {
                                           fontSize: 12.sp),
                                     ),
                                     Container(
-                                      width: 75.w,
+                                      width: 70.w,
                                       child: Row(
                                         children: [
                                           Text(
@@ -178,6 +187,26 @@ class MessagingLobyyView extends GetView<MessagingLobbyController> {
                                 ),
                               ],
                             ),
+                            Obx(
+                              () => controller
+                                          .lobbyChatList[index].isSeen.value ==
+                                      true
+                                  ? SizedBox()
+                                  : Container(
+                                      height: 4.h,
+                                      width: 5.w,
+                                      decoration: BoxDecoration(
+                                          color: ColorServices.mainColor,
+                                          shape: BoxShape.circle),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        "!",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 7.sp),
+                                      ),
+                                    ),
+                            )
                           ],
                         ),
                       );

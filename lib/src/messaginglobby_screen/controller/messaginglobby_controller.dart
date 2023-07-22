@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:oceanix/services/getstorage_services.dart';
@@ -152,7 +151,8 @@ class MessagingLobbyController extends GetxController {
               "datecreated": DateTime.now().toString(),
               "isText": true
             }
-          ]
+          ],
+          "seenby": [Get.find<StorageServices>().storage.read('firstname')]
         });
       } else {
         var postDocumentReference = await FirebaseFirestore.instance
@@ -168,7 +168,8 @@ class MessagingLobbyController extends GetxController {
               "isText": true
             }
           ]),
-          "updatedAt": DateTime.now()
+          "updatedAt": DateTime.now(),
+          'seenby': [Get.find<StorageServices>().storage.read('firstname')],
         });
       }
       Get.back();
@@ -190,6 +191,7 @@ class MessagingLobbyController extends GetxController {
 
     listener = streamChats!.listen((event) async {
       for (var chats in event.docs) {
+        print("called");
         var userDetails = await chats['users'];
         List users = [];
         Map usertodisplay = {};
@@ -204,13 +206,21 @@ class MessagingLobbyController extends GetxController {
           }
         }
         var newchatlist = chats['chatmessages'].reversed.toList();
+        bool isSeen = false;
+        for (var i = 0; i < chats['seenby'].length; i++) {
+          if (Get.find<StorageServices>().storage.read('firstname') ==
+              chats['seenby'][i]) {
+            isSeen = true;
+          }
+        }
 
         dataList.add({
           "id": chats.id,
           "updatedAt": chats['updatedAt'].toDate().toString(),
           "chatmessages": newchatlist,
           "users": users,
-          "usertodisplay": usertodisplay
+          "usertodisplay": usertodisplay,
+          "isSeen": isSeen.toString()
         });
       }
 
@@ -233,65 +243,26 @@ class MessagingLobbyController extends GetxController {
     });
   }
 
-  createChat_from_inside(
-      {required String sendtoID, required String chatmessage}) async {
-    try {
-      var sendToDocumentReference =
-          await FirebaseFirestore.instance.collection('users').doc(sendtoID);
-      var userDocumentReference = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(Get.find<StorageServices>().storage.read('id'));
-      var res = await FirebaseFirestore.instance.collection('chats').where(
-          'users',
-          isEqualTo: [userDocumentReference, sendToDocumentReference]).get();
-      var res2 = await FirebaseFirestore.instance.collection('chats').where(
-          'users',
-          isEqualTo: [sendToDocumentReference, userDocumentReference]).get();
-      var chat = res.docs;
-      var chat2 = res2.docs;
-      String chatdocumentID = '';
-      for (var i = 0; i < chat.length; i++) {
-        chatdocumentID = chat[i].id;
+  onOpenUpdateSeenBy({required String chatDocumentID}) async {
+    var res = await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatDocumentID)
+        .get();
+    List seenby = res.get('seenby');
+    bool isExist = false;
+    for (var i = 0; i < seenby.length; i++) {
+      if (seenby[i] == Get.find<StorageServices>().storage.read('firstname')) {
+        isExist = true;
       }
-      if (chatdocumentID == '') {
-        for (var i = 0; i < chat2.length; i++) {
-          chatdocumentID = chat2[i].id;
-        }
-      }
-
-      if (chatdocumentID == '') {
-        await FirebaseFirestore.instance.collection('chats').add({
-          "users": [userDocumentReference, sendToDocumentReference],
-          "updatedAt": DateTime.now(),
-          "chatmessages": [
-            {
-              "message": chatmessage,
-              "sender": Get.find<StorageServices>().storage.read('id'),
-              "receiver": sendtoID,
-              "datecreated": DateTime.now().toString(),
-              "isText": true
-            }
-          ]
-        });
-      } else {
-        var postDocumentReference = await FirebaseFirestore.instance
-            .collection('chats')
-            .doc(chatdocumentID);
-        postDocumentReference.update({
-          'chatmessages': FieldValue.arrayUnion([
-            {
-              "message": chatmessage,
-              "sender": Get.find<StorageServices>().storage.read('id'),
-              "receiver": sendtoID,
-              "datecreated": DateTime.now().toString(),
-              "isText": true
-            }
-          ]),
-          "updatedAt": DateTime.now()
-        });
-      }
-    } on Exception catch (e) {
-      print(e);
+    }
+    if (isExist == false) {
+      var postDocumentReference = await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatDocumentID);
+      postDocumentReference.update({
+        'seenby': FieldValue.arrayUnion(
+            [Get.find<StorageServices>().storage.read('firstname')]),
+      });
     }
   }
 }

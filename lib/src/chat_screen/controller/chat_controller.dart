@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +33,8 @@ class ChatController extends GetxController {
           .obs;
   RxString receiverName = ''.obs;
   ScrollController scrollController = ScrollController();
+
+  RxList<String> seenByList = <String>[].obs;
   @override
   void onInit() async {
     userDetails = await Get.arguments['userDetails'];
@@ -72,11 +73,35 @@ class ChatController extends GetxController {
 
     listener = streamChats!.listen((event) async {
       var data = await event.data();
-      log(jsonEncode(data['chatmessages']));
       messages.assignAll(await chatsFromJson(jsonEncode(data['chatmessages'])));
+      seenByList.clear();
+      for (var i = 0; i < data['seenby'].length; i++) {
+        String name = data['seenby'][i].toString() ==
+                Get.find<StorageServices>().storage.read('firstname')
+            ? "you"
+            : data['seenby'][i].toString();
+        seenByList.add(name);
+      }
       Future.delayed(Duration(seconds: 1), () {
         scrollController.jumpTo(scrollController.position.maxScrollExtent);
       });
+      List seenby = data['seenby'];
+      bool isExist = false;
+      for (var i = 0; i < seenby.length; i++) {
+        if (seenby[i] ==
+            Get.find<StorageServices>().storage.read('firstname')) {
+          isExist = true;
+        }
+      }
+      if (isExist == false) {
+        var postDocumentReference = await FirebaseFirestore.instance
+            .collection('chats')
+            .doc(chatDocumentID.value);
+        postDocumentReference.update({
+          'seenby': FieldValue.arrayUnion(
+              [Get.find<StorageServices>().storage.read('firstname')]),
+        });
+      }
     });
   }
 
@@ -96,7 +121,8 @@ class ChatController extends GetxController {
             "isText": true
           }
         ]),
-        "updatedAt": DateTime.now()
+        "updatedAt": DateTime.now(),
+        'seenby': [Get.find<StorageServices>().storage.read('firstname')],
       });
       Future.delayed(Duration(seconds: 1), () {
         scrollController.jumpTo(scrollController.position.maxScrollExtent);
@@ -115,8 +141,32 @@ class ChatController extends GetxController {
     }
   }
 
+  oncloseUpdateSeenBy() async {
+    var res = await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatDocumentID.value)
+        .get();
+    List seenby = res.get('seenby');
+    bool isExist = false;
+    for (var i = 0; i < seenby.length; i++) {
+      if (seenby[i] == Get.find<StorageServices>().storage.read('firstname')) {
+        isExist = true;
+      }
+    }
+    if (isExist == false) {
+      var postDocumentReference = await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatDocumentID.value);
+      postDocumentReference.update({
+        'seenby': FieldValue.arrayUnion(
+            [Get.find<StorageServices>().storage.read('firstname')]),
+      });
+    }
+  }
+
   @override
   void onClose() async {
+    oncloseUpdateSeenBy();
     listener!.cancel();
     listener_tocustomer!.cancel();
     super.onClose();

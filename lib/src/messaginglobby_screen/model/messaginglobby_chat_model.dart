@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:get/get.dart';
+
 List<ChatModel> chatModelFromJson(String str) =>
     List<ChatModel>.from(json.decode(str).map((x) => ChatModel.fromJson(x)));
 
@@ -16,6 +18,7 @@ class ChatModel {
   List<Chatmessage> chatmessages;
   List<User> users;
   User usertodisplay;
+  RxBool isSeen;
 
   ChatModel({
     required this.id,
@@ -23,10 +26,12 @@ class ChatModel {
     required this.chatmessages,
     required this.users,
     required this.usertodisplay,
+    required this.isSeen,
   });
 
   factory ChatModel.fromJson(Map<String, dynamic> json) => ChatModel(
         id: json["id"],
+        isSeen: json["isSeen"].toString() == "true" ? true.obs : false.obs,
         updatedAt: DateTime.parse(json["updatedAt"]),
         chatmessages: List<Chatmessage>.from(
             json["chatmessages"].map((x) => Chatmessage.fromJson(x))),
@@ -36,6 +41,7 @@ class ChatModel {
 
   Map<String, dynamic> toJson() => {
         "id": id,
+        "isSeen": isSeen,
         "updatedAt": updatedAt.toIso8601String(),
         "chatmessages": List<dynamic>.from(chatmessages.map((x) => x.toJson())),
         "users": List<dynamic>.from(users.map((x) => x.toJson())),

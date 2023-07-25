@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:oceanix/services/notification_services.dart';
 
 import '../../../services/getstorage_services.dart';
@@ -25,9 +29,9 @@ class ChatController extends GetxController {
   RxList<Chats> messages = <Chats>[].obs;
 
   User? userDetails;
-
+  UploadTask? uploadTask;
   RxBool isOnline = false.obs;
-
+  final ImagePicker picker = ImagePicker();
   RxString receiverImage =
       "https://firebasestorage.googleapis.com/v0/b/oceanix-f6af3.appspot.com/o/avatar-icon-human-a-person-s-badge-social-media-profile-symbol-the-symbol-of-a-person-vector.jpg?alt=media&token=11992427-ec8d-4c8c-9552-b21585aa6335"
           .obs;
@@ -135,6 +139,56 @@ class ChatController extends GetxController {
                 " " +
                 Get.find<StorageServices>().storage.read('lastname'),
             subtitle: "");
+      }
+    } on Exception catch (e) {
+      print(e);
+    }
+  }
+
+  createChat_from_inside_image() async {
+    chatmessage.clear();
+    try {
+      final XFile? result = await picker.pickImage(source: ImageSource.gallery);
+      if (result != null) {
+        Uint8List uint8list =
+            Uint8List.fromList(File(result.path).readAsBytesSync());
+        final ref =
+            await FirebaseStorage.instance.ref().child("files/${result.path}");
+        uploadTask = ref.putData(uint8list);
+        final snapshot = await uploadTask!.whenComplete(() {});
+        String fileLink = await snapshot.ref.getDownloadURL();
+
+        var postDocumentReference = await FirebaseFirestore.instance
+            .collection('chats')
+            .doc(chatDocumentID.value);
+        postDocumentReference.update({
+          'chatmessages': FieldValue.arrayUnion([
+            {
+              "message": fileLink,
+              "sender": Get.find<StorageServices>().storage.read('id'),
+              "receiver": sendtoID.value,
+              "datecreated": DateTime.now().toString(),
+              "isText": false
+            }
+          ]),
+          "updatedAt": DateTime.now(),
+          'seenby': [Get.find<StorageServices>().storage.read('firstname')],
+        });
+        Future.delayed(Duration(seconds: 1), () {
+          scrollController.jumpTo(scrollController.position.maxScrollExtent);
+        });
+        if (isOnline.value == false) {
+          Get.find<NotificationServices>().sendNotification(
+              userToken: fcmToken.value,
+              message: Get.find<StorageServices>().storage.read('firstname') +
+                  "sent an image.",
+              title: Get.find<StorageServices>().storage.read('firstname') +
+                  " " +
+                  Get.find<StorageServices>().storage.read('lastname'),
+              subtitle: "");
+        }
+      } else {
+        // User canceled the picker
       }
     } on Exception catch (e) {
       print(e);

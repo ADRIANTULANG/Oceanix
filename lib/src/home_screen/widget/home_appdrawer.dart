@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import '../../messaginglobby_screen/view/messaginglobby_view.dart';
+import '../../preserving_marine_resources_screen/view/pmr_view.dart';
 import '../../profile_screen/view/profile_view.dart';
 import '../alertdialog/home_alertdialogs.dart';
 import '../controller/home_controller.dart';
@@ -46,7 +47,7 @@ class HomeAppDrawer {
               style: TextStyle(color: Colors.white),
             ),
             onTap: () {
-              // Get.to(() => ProfileView());
+              Get.to(() => PMRview());
             },
           ),
           ListTile(

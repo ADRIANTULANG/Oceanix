@@ -40,9 +40,10 @@ class HomeController extends GetxController {
   RxList<Records> recordsList = <Records>[].obs;
   RxList<Post> postList = <Post>[].obs;
 
-  RxString fileName = ''.obs;
-  RxString filePath = ''.obs;
-  RxString fileType = ''.obs;
+  // RxString fileName = ''.obs;
+  // RxString filePath = ''.obs;
+  // RxString fileType = ''.obs;
+  RxList imagesPick = [].obs;
   UploadTask? uploadTask;
   RxBool isPosting = false.obs;
 
@@ -102,12 +103,21 @@ class HomeController extends GetxController {
         };
         data.add(obj);
       }
-
       postList.assignAll(await postFromJson(jsonEncode(data)));
       postList.sort((b, a) => a.datecreated.compareTo(b.datecreated));
     } on Exception catch (e) {
       print(e);
     }
+  }
+
+  deletePost({required String documentID}) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('post')
+          .doc(documentID)
+          .delete();
+      postList.removeWhere((element) => element.id == documentID);
+    } catch (e) {}
   }
 
   getDuration({required DateTime start, required DateTime end}) {
@@ -120,14 +130,20 @@ class HomeController extends GetxController {
   }
 
   pickFilesInGallery() async {
-    final XFile? result = await picker.pickImage(source: ImageSource.gallery);
-    if (result != null) {
-      filePath.value = result.path;
-      fileName.value = result.name;
-      fileType.value = result.path.split('.').last;
+    imagesPick.clear();
+    final List<XFile> result = await picker.pickMultiImage();
+    if (result.length > 0) {
+      for (var i = 0; i < result.length; i++) {
+        imagesPick.add({
+          "filePath": result[i].path,
+          "fileName": result[i].name,
+          "fileType": result[i].path.split('.').last
+        });
+      }
     } else {
       // User canceled the picker
     }
+    print(imagesPick);
   }
 
   postSomething() async {
@@ -137,20 +153,23 @@ class HomeController extends GetxController {
       var userDocumentReference = await FirebaseFirestore.instance
           .collection('users')
           .doc(Get.find<StorageServices>().storage.read('id'));
-
-      if (fileName != '') {
-        Uint8List uint8list =
-            Uint8List.fromList(File(filePath.value).readAsBytesSync());
-        final ref = await FirebaseStorage.instance
-            .ref()
-            .child("files/${fileName.value}");
-        uploadTask = ref.putData(uint8list);
-        final snapshot = await uploadTask!.whenComplete(() {});
-        fileLink = await snapshot.ref.getDownloadURL();
+      List imageLinkList = [];
+      if (imagesPick.length > 0) {
+        for (var i = 0; i < imagesPick.length; i++) {
+          Uint8List uint8list = Uint8List.fromList(
+              File(imagesPick[i]['filePath']).readAsBytesSync());
+          final ref = await FirebaseStorage.instance
+              .ref()
+              .child("files/${imagesPick[i]['fileName']}");
+          uploadTask = ref.putData(uint8list);
+          final snapshot = await uploadTask!.whenComplete(() {});
+          fileLink = await snapshot.ref.getDownloadURL();
+          imageLinkList.add(fileLink);
+        }
       }
       await FirebaseFirestore.instance.collection('post').add({
         "message": post.text,
-        "image": fileLink,
+        "image": imageLinkList,
         "user": userDocumentReference,
         "userid": Get.find<StorageServices>().storage.read('id'),
         "comments": [],

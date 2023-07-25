@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:oceanix/services/getstorage_services.dart';
 import 'package:oceanix/src/messaginglobby_screen/model/messaginglobby_chat_model.dart';
 
@@ -31,6 +35,9 @@ class MessagingLobbyController extends GetxController {
     }
     super.onClose();
   }
+
+  UploadTask? uploadTask;
+  final ImagePicker picker = ImagePicker();
 
   RxList<Users> usersList = <Users>[].obs;
   RxList<Users> usersList_masterList = <Users>[].obs;
@@ -173,6 +180,87 @@ class MessagingLobbyController extends GetxController {
         });
       }
       Get.back();
+    } on Exception catch (e) {
+      print(e);
+    }
+  }
+
+  createChatWithImage() async {
+    try {
+      final XFile? result = await picker.pickImage(source: ImageSource.gallery);
+      if (result != null) {
+        Uint8List uint8list =
+            Uint8List.fromList(File(result.path).readAsBytesSync());
+        final ref =
+            await FirebaseStorage.instance.ref().child("files/${result.path}");
+        uploadTask = ref.putData(uint8list);
+        final snapshot = await uploadTask!.whenComplete(() {});
+        String fileLink = await snapshot.ref.getDownloadURL();
+        String sendtoID = '';
+        for (var i = 0; i < usersList_masterList.length; i++) {
+          if (usersList_masterList[i].isSelected.value == true) {
+            sendtoID = usersList_masterList[i].id;
+          }
+        }
+        var sendToDocumentReference =
+            await FirebaseFirestore.instance.collection('users').doc(sendtoID);
+        var userDocumentReference = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(Get.find<StorageServices>().storage.read('id'));
+
+        var res = await FirebaseFirestore.instance.collection('chats').where(
+            'users',
+            isEqualTo: [userDocumentReference, sendToDocumentReference]).get();
+        var res2 = await FirebaseFirestore.instance.collection('chats').where(
+            'users',
+            isEqualTo: [sendToDocumentReference, userDocumentReference]).get();
+        var chat = res.docs;
+        var chat2 = res2.docs;
+        String chatdocumentID = '';
+        for (var i = 0; i < chat.length; i++) {
+          chatdocumentID = chat[i].id;
+        }
+        if (chatdocumentID == '') {
+          for (var i = 0; i < chat2.length; i++) {
+            chatdocumentID = chat2[i].id;
+          }
+        }
+
+        if (chatdocumentID == '') {
+          await FirebaseFirestore.instance.collection('chats').add({
+            "users": [userDocumentReference, sendToDocumentReference],
+            "updatedAt": DateTime.now(),
+            "chatmessages": [
+              {
+                "message": fileLink,
+                "sender": Get.find<StorageServices>().storage.read('id'),
+                "receiver": sendtoID,
+                "datecreated": DateTime.now().toString(),
+                "isText": false
+              }
+            ],
+            "seenby": [Get.find<StorageServices>().storage.read('firstname')]
+          });
+        } else {
+          var postDocumentReference = await FirebaseFirestore.instance
+              .collection('chats')
+              .doc(chatdocumentID);
+          postDocumentReference.update({
+            'chatmessages': FieldValue.arrayUnion([
+              {
+                "message": fileLink,
+                "sender": Get.find<StorageServices>().storage.read('id'),
+                "receiver": sendtoID,
+                "datecreated": DateTime.now().toString(),
+                "isText": false
+              }
+            ]),
+            "updatedAt": DateTime.now(),
+            'seenby': [Get.find<StorageServices>().storage.read('firstname')],
+          });
+        }
+        Get.back();
+      } else {}
     } on Exception catch (e) {
       print(e);
     }

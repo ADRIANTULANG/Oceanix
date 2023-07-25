@@ -29,22 +29,22 @@ class CommentView extends GetView<CommentsController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    controller.post!.image == ""
+                    controller.post!.image.length == 0
                         ? SizedBox(
                             height: 5.h,
                           )
                         : SizedBox(),
-                    controller.post!.image == ""
-                        ? SizedBox()
-                        : Container(
-                            height: 35.h,
-                            width: 100.w,
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image:
-                                        NetworkImage(controller.post!.image))),
-                          ),
+                    // controller.post!.image == ""
+                    //     ? SizedBox()
+                    //     : Container(
+                    //         height: 35.h,
+                    //         width: 100.w,
+                    //         decoration: BoxDecoration(
+                    //             image: DecorationImage(
+                    //                 fit: BoxFit.cover,
+                    //                 image:
+                    //                     NetworkImage(controller.post!.image))),
+                    //       ),
                     SizedBox(
                       height: 2.h,
                     ),

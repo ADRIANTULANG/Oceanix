@@ -88,23 +88,36 @@ class ChatView extends GetView<ChatController> {
                                                 .read('id')
                                         ? Alignment.topLeft
                                         : Alignment.topRight),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    color:
-                                        (controller.messages[index].receiver ==
-                                                Get.find<StorageServices>()
-                                                    .storage
-                                                    .read('id')
-                                            ? Colors.grey.shade200
-                                            : Colors.cyan[50]),
-                                  ),
-                                  padding: EdgeInsets.all(16),
-                                  child: Text(
-                                    controller.messages[index].message,
-                                    style: TextStyle(fontSize: 15),
-                                  ),
-                                ),
+                                child: controller.messages[index].isText == true
+                                    ? Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          color: (controller.messages[index]
+                                                      .receiver ==
+                                                  Get.find<StorageServices>()
+                                                      .storage
+                                                      .read('id')
+                                              ? Colors.grey.shade200
+                                              : Colors.cyan[50]),
+                                        ),
+                                        padding: EdgeInsets.all(16),
+                                        child: Text(
+                                          controller.messages[index].message,
+                                          style: TextStyle(fontSize: 15),
+                                        ),
+                                      )
+                                    : Container(
+                                        height: 35.h,
+                                        width: 70.w,
+                                        decoration: BoxDecoration(
+                                            color: Colors.grey[300],
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                            image: DecorationImage(
+                                                image: NetworkImage(controller
+                                                    .messages[index].message))),
+                                      ),
                               ),
                             ),
                             Padding(
@@ -176,7 +189,7 @@ class ChatView extends GetView<ChatController> {
                   children: [
                     Container(
                       height: 5.h,
-                      width: 85.w,
+                      width: 75.w,
                       child: TextField(
                         controller: controller.chatmessage,
                         decoration: InputDecoration(
@@ -191,8 +204,15 @@ class ChatView extends GetView<ChatController> {
                     ),
                     InkWell(
                         onTap: () {
-                          controller.createChat_from_inside(
-                              chattext: controller.chatmessage.text);
+                          controller.createChat_from_inside_image();
+                        },
+                        child: Icon(Icons.add)),
+                    InkWell(
+                        onTap: () {
+                          if (controller.chatmessage.text.isNotEmpty) {
+                            controller.createChat_from_inside(
+                                chattext: controller.chatmessage.text);
+                          }
                         },
                         child: Icon(Icons.send))
                   ],

@@ -14,7 +14,7 @@ String postToJson(List<Post> data) =>
 
 class Post {
   String id;
-  String image;
+  List<String> image;
   List<dynamic> likes;
   DateTime datecreated;
   String message;
@@ -37,8 +37,8 @@ class Post {
 
   factory Post.fromJson(Map<String, dynamic> json) => Post(
         id: json["id"],
-        image: json["image"],
         isLike: false.obs,
+        image: List<String>.from(json["image"].map((x) => x)),
         likesCount: int.parse(json["likes"].length.toString()).obs,
         likes: List<dynamic>.from(json["likes"].map((x) => x)),
         datecreated: DateTime.parse(json["datecreated"]),
@@ -50,8 +50,8 @@ class Post {
   Map<String, dynamic> toJson() => {
         "id": id,
         "isLike": isLike,
+        "image": List<dynamic>.from(image.map((x) => x)),
         "likesCount": likesCount,
-        "image": image,
         "likes": List<dynamic>.from(likes.map((x) => x)),
         "datecreated": datecreated.toIso8601String(),
         "message": message,

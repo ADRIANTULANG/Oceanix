@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
@@ -90,7 +88,7 @@ class CreatePostView extends GetView<HomeController> {
                         controller.pickFilesInGallery();
                       },
                       child: Obx(
-                        () => controller.fileName.value == ''
+                        () => controller.imagesPick.length == 0
                             ? Container(
                                 height: 35.h,
                                 width: 100.w,
@@ -117,11 +115,15 @@ class CreatePostView extends GetView<HomeController> {
                                 width: 100.w,
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(4),
-                                    image: DecorationImage(
-                                        fit: BoxFit.fitWidth,
-                                        image: FileImage(
-                                            File(controller.filePath.value))),
                                     border: Border.all()),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  controller.imagesPick.length.toString() +
+                                      " Images picked",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15.sp),
+                                ),
                               ),
                       ),
                     )

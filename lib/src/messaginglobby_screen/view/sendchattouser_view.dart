@@ -148,7 +148,7 @@ class SendChatToUser extends GetView<MessagingLobbyController> {
                 children: [
                   Container(
                     height: 7.h,
-                    width: 75.w,
+                    width: 70.w,
                     child: TextField(
                       controller: controller.message,
                       decoration: InputDecoration(
@@ -165,17 +165,31 @@ class SendChatToUser extends GetView<MessagingLobbyController> {
                   Expanded(
                       child: InkWell(
                     onTap: () async {
+                      controller.createChatWithImage();
+                    },
+                    child: Container(
+                        height: 7.h,
+                        padding: EdgeInsets.only(left: 1.w),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.image,
+                          size: 25.sp,
+                        )),
+                  )),
+                  Expanded(
+                      child: InkWell(
+                    onTap: () async {
                       if (controller.message.text.isNotEmpty) {
                         controller.createChat();
                       }
                     },
                     child: Container(
                         height: 7.h,
-                        padding: EdgeInsets.only(left: 3.w),
+                        padding: EdgeInsets.only(left: 2.w),
                         alignment: Alignment.center,
                         child: Icon(
                           Icons.send_rounded,
-                          size: 35.sp,
+                          size: 25.sp,
                         )),
                   ))
                 ],

@@ -150,14 +150,23 @@ class MessagingLobyyView extends GetView<MessagingLobbyController> {
                                                         .read('id')
                                                 ? "you: "
                                                 : "",
+                                            maxLines: 1,
                                             style: TextStyle(
                                                 overflow: TextOverflow.ellipsis,
                                                 fontWeight: FontWeight.w400,
                                                 fontSize: 9.sp),
                                           ),
                                           Text(
-                                            controller.lobbyChatList[index]
-                                                .chatmessages[0].message,
+                                            controller
+                                                        .lobbyChatList[index]
+                                                        .chatmessages[0]
+                                                        .isText ==
+                                                    true
+                                                ? controller
+                                                    .lobbyChatList[index]
+                                                    .chatmessages[0]
+                                                    .message
+                                                : "sent an image.",
                                             style: TextStyle(
                                                 overflow: TextOverflow.ellipsis,
                                                 fontWeight: FontWeight.w400,

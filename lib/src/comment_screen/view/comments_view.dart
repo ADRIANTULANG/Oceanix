@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:oceanix/src/comment_screen/image_widgets/more_image.dart';
+import 'package:oceanix/src/comment_screen/image_widgets/one_image.dart';
+import 'package:oceanix/src/comment_screen/image_widgets/three_image.dart';
+import 'package:oceanix/src/comment_screen/image_widgets/two_image.dart';
+import 'package:oceanix/src/comment_screen/widget/view_postpictures.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../services/colors_services.dart';
@@ -34,17 +39,38 @@ class CommentView extends GetView<CommentsController> {
                             height: 5.h,
                           )
                         : SizedBox(),
-                    // controller.post!.image == ""
-                    //     ? SizedBox()
-                    //     : Container(
-                    //         height: 35.h,
-                    //         width: 100.w,
-                    //         decoration: BoxDecoration(
-                    //             image: DecorationImage(
-                    //                 fit: BoxFit.cover,
-                    //                 image:
-                    //                     NetworkImage(controller.post!.image))),
-                    //       ),
+                    InkWell(
+                      onTap: () {
+                        if (controller.post!.image.length > 0) {
+                          Get.to(() => ViewPostPictures(
+                              imagesList: controller.post!.image));
+                        }
+                      },
+                      child: controller.post!.image.length == 0
+                          ? SizedBox()
+                          : controller.post!.image.length == 1
+                              ? OneImage(image: controller.post!.image[0])
+                              : controller.post!.image.length == 2
+                                  ? TwoImage(
+                                      image1: controller.post!.image[0],
+                                      image2: controller.post!.image[1])
+                                  : controller.post!.image.length == 3
+                                      ? ThreeImage(
+                                          image1: controller.post!.image[0],
+                                          image2: controller.post!.image[1],
+                                          image3: controller.post!.image[2])
+                                      : controller.post!.image.length > 3
+                                          ? MoreImage(
+                                              image1: controller.post!.image[0],
+                                              image2: controller.post!.image[1],
+                                              image3: controller.post!.image[2],
+                                              remaining: (controller
+                                                          .post!.image.length -
+                                                      3)
+                                                  .toString(),
+                                            )
+                                          : SizedBox(),
+                    ),
                     SizedBox(
                       height: 2.h,
                     ),

@@ -6,6 +6,7 @@ import 'package:oceanix/src/home_screen/controller/home_controller.dart';
 import 'package:oceanix/src/home_screen/image_widgets/more_image.dart';
 import 'package:oceanix/src/home_screen/image_widgets/three_image.dart';
 import 'package:oceanix/src/home_screen/image_widgets/two_image.dart';
+import 'package:oceanix/src/home_screen/widget/view_postpictures.dart';
 import 'package:sizer/sizer.dart';
 
 import '../image_widgets/one_image.dart';
@@ -128,52 +129,63 @@ class FeedAndPosting extends GetView<HomeController> {
                                         ),
                                       ),
                                     ),
-                              controller.postList[index].image.length == 0
-                                  ? SizedBox()
-                                  : controller.postList[index].image.length == 1
-                                      ? OneImage(
-                                          image: controller
-                                              .postList[index].image[0])
-                                      : controller.postList[index].image
-                                                  .length ==
-                                              2
-                                          ? TwoImage(
-                                              image1: controller
-                                                  .postList[index].image[0],
-                                              image2: controller
-                                                  .postList[index].image[1])
-                                          : controller.postList[index].image
-                                                      .length ==
-                                                  3
-                                              ? ThreeImage(
-                                                  image1: controller
-                                                      .postList[index].image[0],
-                                                  image2: controller
-                                                      .postList[index].image[1],
-                                                  image3: controller
-                                                      .postList[index].image[2])
-                                              : controller.postList[index].image
-                                                          .length >
-                                                      3
-                                                  ? MoreImage(
-                                                      image1: controller
-                                                          .postList[index]
-                                                          .image[0],
-                                                      image2: controller
-                                                          .postList[index]
-                                                          .image[1],
-                                                      image3: controller
-                                                          .postList[index]
-                                                          .image[2],
-                                                      remaining: (controller
-                                                                  .postList[
-                                                                      index]
-                                                                  .image
-                                                                  .length -
-                                                              3)
-                                                          .toString(),
-                                                    )
-                                                  : SizedBox(),
+                              InkWell(
+                                onTap: () {
+                                  if (controller.postList[index].image.length >
+                                      0) {
+                                    Get.to(() => ViewPostPictures(
+                                        imagesList:
+                                            controller.postList[index].image));
+                                  }
+                                },
+                                child: controller.postList[index].image.length ==
+                                        0
+                                    ? SizedBox()
+                                    : controller.postList[index].image.length ==
+                                            1
+                                        ? OneImage(
+                                            image: controller
+                                                .postList[index].image[0])
+                                        : controller.postList[index].image.length ==
+                                                2
+                                            ? TwoImage(
+                                                image1: controller
+                                                    .postList[index].image[0],
+                                                image2: controller
+                                                    .postList[index].image[1])
+                                            : controller.postList[index].image.length ==
+                                                    3
+                                                ? ThreeImage(
+                                                    image1: controller
+                                                        .postList[index]
+                                                        .image[0],
+                                                    image2: controller
+                                                        .postList[index]
+                                                        .image[1],
+                                                    image3: controller
+                                                        .postList[index]
+                                                        .image[2])
+                                                : controller.postList[index].image.length > 3
+                                                    ? MoreImage(
+                                                        image1: controller
+                                                            .postList[index]
+                                                            .image[0],
+                                                        image2: controller
+                                                            .postList[index]
+                                                            .image[1],
+                                                        image3: controller
+                                                            .postList[index]
+                                                            .image[2],
+                                                        remaining: (controller
+                                                                    .postList[
+                                                                        index]
+                                                                    .image
+                                                                    .length -
+                                                                3)
+                                                            .toString(),
+                                                      )
+                                                    : SizedBox(),
+                              ),
                               Row(
                                 children: [
                                   Expanded(

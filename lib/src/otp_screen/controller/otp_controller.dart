@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
@@ -29,6 +30,8 @@ class OtpController extends GetxController {
           await auth.signInWithCredential(phoneAuthCredential);
 
       if (authCredential.user != null) {
+        var deviceInfo = DeviceInfoPlugin();
+        var androidDeviceInfo = await deviceInfo.androidInfo;
         try {
           await FirebaseFirestore.instance.collection("users").add({
             "image": "",
@@ -38,7 +41,10 @@ class OtpController extends GetxController {
             "password": password,
             "email": email,
             "usertype": usertype,
-            "isonline": false
+            "isonline": false,
+            "deviceID": androidDeviceInfo.id,
+            "deviceName":
+                androidDeviceInfo.brand + " " + androidDeviceInfo.product,
           });
           Get.back();
           Get.back();

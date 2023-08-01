@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oceanix/src/home_screen/controller/home_controller.dart';
-import 'package:oceanix/src/login_screen/view/login_view.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../services/colors_services.dart';
-import '../../../services/getstorage_services.dart';
 
 class HomeAlertdialogs {
   static showPutName({required HomeController controller}) async {
@@ -71,7 +69,7 @@ class HomeAlertdialogs {
     )));
   }
 
-  static showLogoutDialog() async {
+  static showLogoutDialog({required HomeController controller}) async {
     Get.dialog(AlertDialog(
         content: Container(
       height: 20.h,
@@ -108,9 +106,7 @@ class HomeAlertdialogs {
               ),
               InkWell(
                 onTap: () {
-                  Get.back();
-                  Get.find<StorageServices>().removeStorageCredentials();
-                  Get.offAll(() => LoginView());
+                  controller.logout();
                 },
                 child: Text(
                   "Yes",

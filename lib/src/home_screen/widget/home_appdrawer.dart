@@ -74,7 +74,7 @@ class HomeAppDrawer {
             ),
             onTap: () {
               Get.back();
-              HomeAlertdialogs.showLogoutDialog();
+              HomeAlertdialogs.showLogoutDialog(controller: controller);
             },
           ),
         ],

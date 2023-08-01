@@ -102,6 +102,7 @@ class LoginView extends GetView<LoginController> {
                       } else {
                         controller.login();
                       }
+                      // controller.sampleEmail();
                     }),
               ),
             ),

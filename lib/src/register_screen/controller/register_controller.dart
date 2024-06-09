@@ -40,12 +40,32 @@ class RegistrationController extends GetxController {
           .collection('users')
           .where('email', isEqualTo: email.text)
           .get();
+      print(res.docs.length.toString());
       if (res.docs.length == 0) {
-        verifiyNumber();
+        checkNumber();
       } else {
         RegisterAlertDialog.showEmailAlreadyExist();
       }
-    } catch (e) {}
+    } catch (e) {
+      print("ERROR: ${e.toString()}");
+    }
+  }
+
+  checkNumber() async {
+    try {
+      var res = await FirebaseFirestore.instance
+          .collection('users')
+          .where('contactno', isEqualTo: contact.text)
+          .get();
+      print(res.docs.length.toString());
+      if (res.docs.length == 0) {
+        verifiyNumber();
+      } else {
+        RegisterAlertDialog.showNumberAlreadyExist();
+      }
+    } catch (e) {
+      print("ERROR: ${e.toString()}");
+    }
   }
 
   verifiyNumber() async {
@@ -65,7 +85,9 @@ class RegistrationController extends GetxController {
           Get.to(() => OtpView());
           isVerifyingNumber(false);
         },
-        codeAutoRetrievalTimeout: (String verificationID) {},
+        codeAutoRetrievalTimeout: (String verificationID) {
+          print(verificationID);
+        },
         timeout: Duration(seconds: 60));
   }
 }
